@@ -1,0 +1,20 @@
+# this is your config_ssh.yml file content
+compute:
+  train:
+    instance: g4dn.xlarge
+
+    # Actions need to be passed as one command
+    # per line.
+    actions:
+      on_build_start:        
+        - sed -i '/developer\.download\.nvidia\.com\/compute\/cuda\/repos/d' /etc/apt/sources.list.d/* && sed -i '/developer\.download\.nvidia\.com\/compute\/cuda\/repos/d' /etc/apt/sources.list && sed -i '/developer\.download\.nvidia\.com\/compute\/machine-learning\/repos/d' /etc/apt/sources.list.d/*
+        - apt-key del 7fa2af80  
+        - wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb  
+        - dpkg -i cuda-keyring_1.0-1_all.deb  
+        - apt-get update && apt-get install -y openssh-client  
+        - echo "    IdentityFile /root/.ssh/id_rsa" >> /etc/ssh/ssh_config  
+        - mkdir -p /root/.ssh   
+        - chmod 0700 /root/.ssh  
+        - ssh-keyscan github.com > /root/.ssh/known_hosts  
+        - echo "__ssh_key__" | sed -e 's/-----BEGIN [[:alpha:]]\+ PRIVATE KEY-----/&\n/' -e 's/-----END [[:alpha:]]\+ PRIVATE KEY-----/\n&/' -e 's/\S\{64\}/&\n/g' > /root/.ssh/id_rsa
+        - chmod 0600 /root/.ssh/id_rsa
